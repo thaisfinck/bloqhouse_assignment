@@ -49,7 +49,7 @@ const updateMovie = () => {
 const submitForm = (e) => {
   e.preventDefault();
   updateMovie();
-  router.push("/");
+  router.push("/movies/" + id);
 };
 </script>
 
