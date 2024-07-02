@@ -6,7 +6,9 @@ import { deleteDoc, doc } from "firebase/firestore";
 
 const open = ref(false);
 
-const movies = refreshMovies();
+const movies = refreshMovies().sort((a: any, b: any) => {
+  return a.title.localeCompare(b.title);
+});
 
 const idToBeDeleted = ref("");
 
