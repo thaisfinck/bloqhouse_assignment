@@ -58,6 +58,12 @@ const deleteMovie = async (id: any) => {
 
                   <td>
                     <RouterLink
+                      :to="{ name: 'Show', params: { id: movie.id } }"
+                      class="btn btn-sm btn-info"
+                    >
+                      <i class="fa-solid fa-eye"></i>
+                    </RouterLink>
+                    <RouterLink
                       :to="{ name: 'Edit', params: { id: movie.id } }"
                       class="btn btn-sm btn-primary"
                     >
