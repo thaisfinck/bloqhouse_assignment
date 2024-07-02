@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import { querySnapshot } from "../../fireBaseConfig";
 import { useRoute, useRouter } from "vue-router";
@@ -9,7 +9,7 @@ const route = useRoute();
 
 const router = useRouter();
 
-const id = route.params.id;
+const id = route.params.id.toString();
 
 const movie = querySnapshot.docs
   .map((doc) => {
@@ -23,17 +23,20 @@ const movie = querySnapshot.docs
   })
   .find((movie) => movie.id === id);
 
-const formatedYear = ref(movie.year) ?? "";
+const formatedYear = ref(movie?.year) ?? "";
 
-const fomatedPoster = ref(movie.poster) ?? "No Poster";
+const fomatedPoster = ref(movie?.poster) ?? "No Poster";
 
 const updateMovie = () => {
-  const title = document.getElementById("title").value;
-  const genre = document.getElementById("genre").value;
-  const year = document.getElementById("year").value ?? null;
-  const poster = document.getElementById("poster").files
-    ? document.getElementById("poster").files[0]
-    : null;
+  const titleElement = document.getElementById("title") as HTMLInputElement;
+  const genreElement = document.getElementById("genre") as HTMLInputElement;
+  const yearElement = document.getElementById("year") as HTMLInputElement;
+  const posterElement = document.getElementById("poster") as HTMLInputElement;
+
+  const title = titleElement?.value;
+  const genre = genreElement?.value;
+  const year = yearElement?.value ?? null;
+  const poster = posterElement?.files ? posterElement.files[0] : null;
 
   const updatedMovie = {
     title,
@@ -42,11 +45,15 @@ const updateMovie = () => {
     poster,
   };
 
-  updateDoc(doc(db, "movies", id), updatedMovie);
-  refreshMovies();
+  try {
+    updateDoc(doc(db, "movies", id), updatedMovie);
+    refreshMovies();
+  } catch (error) {
+    console.error("Failed to update the movie:", error);
+  }
 };
 
-const submitForm = (e) => {
+const submitForm = (e: { preventDefault: () => void }) => {
   e.preventDefault();
   updateMovie();
   router.push("/movies/" + id);
@@ -54,7 +61,7 @@ const submitForm = (e) => {
 </script>
 
 <template>
-  <div class="container" style="margin-top: 1rem">
+  <div class="container" style="margin-top: 1rem" v-if="movie">
     <h3>Edit Movie</h3>
     <form>
       <div class="mb-3">

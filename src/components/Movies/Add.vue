@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { addDoc, collection } from "firebase/firestore";
 import { db, refreshMovies } from "../../fireBaseConfig";
 import { useRouter } from "vue-router";
@@ -6,10 +6,15 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const addMovie = () => {
-  const title = document.getElementById("title").value;
-  const genre = document.getElementById("genre").value;
-  const year = document.getElementById("year").value || null;
-  const poster = document.getElementById("poster").files[0] || null;
+  const titleElement = document.getElementById("title") as HTMLInputElement;
+  const genreElement = document.getElementById("genre") as HTMLSelectElement;
+  const yearElement = document.getElementById("year") as HTMLInputElement;
+  const posterElement = document.getElementById("poster") as HTMLInputElement;
+
+  const title = titleElement?.value;
+  const genre = genreElement?.value;
+  const year = yearElement?.value ?? null;
+  const poster = posterElement?.files ? posterElement.files[0] : null;
 
   const newMovie = {
     title,
@@ -22,7 +27,7 @@ const addMovie = () => {
   refreshMovies();
 };
 
-const submitForm = (e) => {
+const submitForm = (e: { preventDefault: () => void }) => {
   e.preventDefault();
   addMovie();
   router.push("/");

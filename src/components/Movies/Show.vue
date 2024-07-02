@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useRoute } from "vue-router";
 import { querySnapshot } from "../../fireBaseConfig";
 
@@ -20,7 +20,7 @@ const movie = querySnapshot.docs
 </script>
 
 <template>
-  <div class="container" style="margin-top: 1rem">
+  <div class="container" style="margin-top: 1rem" v-if="movie">
     <h3>{{ movie.title }}</h3>
     <div class="row">
       <div class="col-md-4" v-if="movie.poster">
