@@ -1,32 +1,30 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
-
-import ConfirmDeleteModal from "../Modals/ConfirmDeleteModal.vue";
-
 import { ref } from "vue";
+import { db, refreshMovies } from "../../fireBaseConfig";
+import { deleteDoc, doc } from "firebase/firestore";
 
 const open = ref(false);
 
-const movies = ref([
-  {
-    id: 1,
-    title: "The Shawshank Redemption",
-    genre: "Drama",
-    year: 1994,
-  },
-  {
-    id: 2,
-    title: "The Godfather",
-    genre: "Crime",
-    year: 1972,
-  },
-  {
-    id: 3,
-    title: "The Dark Knight",
-    genre: "Action",
-    year: 2008,
-  },
-]);
+const movies = refreshMovies();
+
+const idToBeDeleted = ref("");
+
+const openModal = (id: any) => {
+  idToBeDeleted.value = id;
+  open.value = true;
+};
+
+const deleteMovie = async (id: any) => {
+  try {
+    await deleteDoc(doc(db, "movies", id));
+    refreshMovies();
+    open.value = false;
+  } catch (error) {
+    console.error("Error removing document: ", error);
+    open.value = false;
+  }
+};
 </script>
 
 <template>
@@ -68,7 +66,7 @@ const movies = ref([
                     <button
                       type="button"
                       class="btn btn-sm btn-danger"
-                      @click="open = true"
+                      @click="openModal(movie.id)"
                     >
                       <i class="fa-solid fa-trash"></i>
                     </button>
@@ -81,6 +79,40 @@ const movies = ref([
       </div>
     </div>
   </div>
-
-  <ConfirmDeleteModal v-model:visible="open" />
+  <!-- Confirm Deleting Movie Modal -->
+  <div v-if="open">
+    <div class="modal show" style="display: block">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Delete</h5>
+            <button
+              type="button"
+              class="btn-close"
+              @click="open = false"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete this movie?
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="open = false"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              @click="deleteMovie(idToBeDeleted)"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
