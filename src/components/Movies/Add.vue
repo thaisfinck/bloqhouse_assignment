@@ -9,20 +9,13 @@ export default {
       router.push("/");
     },
 
-    async addMovie() {
-      const titleElement = document.getElementById("title") as HTMLInputElement;
-      const genreElement = document.getElementById(
-        "genre"
-      ) as HTMLSelectElement;
-      const yearElement = document.getElementById("year") as HTMLInputElement;
-      const posterElement = document.getElementById(
-        "poster"
-      ) as HTMLInputElement;
-
-      const title = titleElement?.value;
-      const genre = genreElement?.value;
-      const year = yearElement?.value ?? null;
-      const poster = posterElement?.files?.[0] ? posterElement.files[0] : null;
+    async addMovie(submitEvent: any) {
+      const title = submitEvent.target.elements.title.value;
+      const genre = submitEvent.target.elements.genre.value;
+      const year = submitEvent.target.elements.year.value;
+      const poster = submitEvent.target.elements.poster.files[0]
+        ? submitEvent.target.elements.poster.files[0]
+        : null;
 
       const newMovie = {
         title,
@@ -36,7 +29,7 @@ export default {
 
     submitForm(e: { preventDefault: () => void }) {
       e.preventDefault();
-      this.addMovie();
+      this.addMovie(e);
       this.cancel();
     },
   },
@@ -46,14 +39,20 @@ export default {
 <template>
   <div class="container" style="margin-top: 1rem">
     <h3>Add Movie</h3>
-    <form>
+    <form @submit="submitForm">
       <div class="form-group mb-3">
         <label for="title" lass="form-label">Title</label>
-        <input type="text" id="title" class="form-control" required />
+        <input
+          name="title"
+          type="text"
+          id="title"
+          class="form-control"
+          required
+        />
       </div>
       <div class="form-group mb-3">
         <label for="genre" class="form-label">Genre</label>
-        <select class="form-select" id="genre" required>
+        <select name="genre" class="form-select" id="genre" required>
           <option value="action">Action</option>
           <option value="comedy">Comedy</option>
           <option value="drama">Drama</option>
@@ -63,17 +62,17 @@ export default {
       </div>
       <div class="form-group mb-3">
         <label for="year" lass="form-label">Year</label>
-        <input type="number" id="year" class="form-control" />
+        <input name="year" type="number" id="year" class="form-control" />
       </div>
       <div class="form-group mb-3">
         <label for="poster" class="form-label">Upload Poster</label>
-        <input type="file" class="form-control" id="poster" />
+        <input name="poster" type="file" class="form-control" id="poster" />
       </div>
       <div
         class="form-group mb-3"
         style="display: flex; gap: 1rem; margin-top: 1rem"
       >
-        <button type="submit" class="btn btn-primary" @click="submitForm">
+        <button type="submit" class="btn btn-primary" @submit="submitForm">
           Add Movie
         </button>
         <button type="button" class="btn btn-secondary" @click="cancel">

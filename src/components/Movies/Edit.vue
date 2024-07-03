@@ -17,18 +17,13 @@ export default {
     cancel() {
       router.push("/");
     },
-    async updateMovie() {
-      const titleElement = document.getElementById("title") as HTMLInputElement;
-      const genreElement = document.getElementById("genre") as HTMLInputElement;
-      const yearElement = document.getElementById("year") as HTMLInputElement;
-      const posterElement = document.getElementById(
-        "poster"
-      ) as HTMLInputElement;
-
-      const title = titleElement?.value;
-      const genre = genreElement?.value;
-      const year = yearElement?.value ?? null;
-      const poster = posterElement?.files ? posterElement.files[0] : null;
+    async updateMovie(submitEvent: any) {
+      const title = submitEvent.target.elements.title.value;
+      const genre = submitEvent.target.elements.genre.value;
+      const year = submitEvent.target.elements.year.value;
+      const poster = submitEvent.target.elements.poster.files[0]
+        ? submitEvent.target.elements.poster.files[0]
+        : null;
 
       const updatedMovie = {
         title,
@@ -46,7 +41,7 @@ export default {
 
     submitForm(e: { preventDefault: () => void }) {
       e.preventDefault();
-      this.updateMovie();
+      this.updateMovie(e);
       router.push("/movies/" + this.id);
     },
   },
@@ -56,10 +51,11 @@ export default {
 <template>
   <div class="container" style="margin-top: 1rem" v-if="movie">
     <h3>Edit Movie</h3>
-    <form>
+    <form @submit="submitForm">
       <div class="form-group mb-3">
         <label for="title" class="form-label">Title</label>
         <input
+          name="title"
           type="text"
           class="form-control"
           id="title"
@@ -69,7 +65,13 @@ export default {
       </div>
       <div class="form-group mb-3">
         <label for="genre" class="form-label">Genre</label>
-        <select class="form-select" id="genre" v-model="movie.genre" required>
+        <select
+          name="genre"
+          class="form-select"
+          id="genre"
+          v-model="movie.genre"
+          required
+        >
           <option value="action">Action</option>
           <option value="comedy">Comedy</option>
           <option value="drama">Drama</option>
@@ -80,19 +82,11 @@ export default {
       <div class="form-group mb-3">
         <label for="year" class="form-label">Year</label>
         <input
+          name="year"
           type="number"
           class="form-control"
           id="year"
           v-model="movie.year"
-        />
-      </div>
-      <div class="form-group mb-3">
-        <label for="poster" class="form-label">Poster</label>
-        <input
-          type="text"
-          class="form-control"
-          id="poster"
-          v-model="movie.poster"
         />
       </div>
       <div class="form-group mb-3" v-if="movie.poster">
@@ -100,14 +94,14 @@ export default {
       </div>
       <div class="form-group mb-3" v-else>
         <label for="poster" class="form-label">Upload Poster</label>
-        <input type="file" class="form-control" id="poster" />
+        <input name="poster" type="file" class="form-control" id="poster" />
       </div>
 
       <div
         class="form-group mb-3"
         style="display: flex; gap: 1rem; margin-top: 1rem"
       >
-        <button type="submit" class="btn btn-primary" @click="submitForm">
+        <button type="submit" class="btn btn-primary" @submit="submitForm">
           Update Movie
         </button>
 
