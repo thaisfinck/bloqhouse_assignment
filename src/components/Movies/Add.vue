@@ -1,36 +1,45 @@
-<script setup lang="ts">
+<script lang="ts">
 import { addDoc, collection } from "firebase/firestore";
-import { db, refreshMovies } from "../../fireBaseConfig";
-import { useRouter } from "vue-router";
+import { db } from "../../fireBaseConfig";
+import router from "../../router";
 
-const router = useRouter();
+export default {
+  methods: {
+    cancel() {
+      router.push("/");
+    },
 
-const addMovie = () => {
-  const titleElement = document.getElementById("title") as HTMLInputElement;
-  const genreElement = document.getElementById("genre") as HTMLSelectElement;
-  const yearElement = document.getElementById("year") as HTMLInputElement;
-  const posterElement = document.getElementById("poster") as HTMLInputElement;
+    async addMovie() {
+      const titleElement = document.getElementById("title") as HTMLInputElement;
+      const genreElement = document.getElementById(
+        "genre"
+      ) as HTMLSelectElement;
+      const yearElement = document.getElementById("year") as HTMLInputElement;
+      const posterElement = document.getElementById(
+        "poster"
+      ) as HTMLInputElement;
 
-  const title = titleElement?.value;
-  const genre = genreElement?.value;
-  const year = yearElement?.value ?? null;
-  const poster = posterElement?.files ? posterElement.files[0] : null;
+      const title = titleElement?.value;
+      const genre = genreElement?.value;
+      const year = yearElement?.value ?? null;
+      const poster = posterElement?.files?.[0] ? posterElement.files[0] : null;
 
-  const newMovie = {
-    title,
-    genre,
-    year,
-    poster,
-  };
+      const newMovie = {
+        title,
+        genre,
+        year,
+        poster,
+      };
 
-  addDoc(collection(db, "movies"), newMovie);
-  refreshMovies();
-};
+      await addDoc(collection(db, "movies"), newMovie);
+    },
 
-const submitForm = (e: { preventDefault: () => void }) => {
-  e.preventDefault();
-  addMovie();
-  router.push("/");
+    submitForm(e: { preventDefault: () => void }) {
+      e.preventDefault();
+      this.addMovie();
+      this.cancel();
+    },
+  },
 };
 </script>
 
@@ -38,11 +47,11 @@ const submitForm = (e: { preventDefault: () => void }) => {
   <div class="container" style="margin-top: 1rem">
     <h3>Add Movie</h3>
     <form>
-      <div class="form-group">
+      <div class="form-group mb-3">
         <label for="title" lass="form-label">Title</label>
         <input type="text" id="title" class="form-control" required />
       </div>
-      <div class="form-group">
+      <div class="form-group mb-3">
         <label for="genre" class="form-label">Genre</label>
         <select class="form-select" id="genre" required>
           <option value="action">Action</option>
@@ -52,23 +61,22 @@ const submitForm = (e: { preventDefault: () => void }) => {
           <option value="sci-fi">Sci-Fi</option>
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group mb-3">
         <label for="year" lass="form-label">Year</label>
         <input type="number" id="year" class="form-control" />
       </div>
-      <div class="mb-3">
+      <div class="form-group mb-3">
         <label for="poster" class="form-label">Upload Poster</label>
         <input type="file" class="form-control" id="poster" />
       </div>
-      <div class="mb-3" style="display: flex; gap: 1rem; margin-top: 1rem">
+      <div
+        class="form-group mb-3"
+        style="display: flex; gap: 1rem; margin-top: 1rem"
+      >
         <button type="submit" class="btn btn-primary" @click="submitForm">
           Add Movie
         </button>
-        <button
-          type="button"
-          class="btn btn-secondary"
-          @click="router.push('/')"
-        >
+        <button type="button" class="btn btn-secondary" @click="cancel">
           Cancel
         </button>
       </div>

@@ -1,31 +1,38 @@
-<script setup lang="ts">
+<script lang="ts">
 import { RouterLink } from "vue-router";
-import { ref } from "vue";
-import { db, refreshMovies } from "../../fireBaseConfig";
+import { db, moviesRef } from "../../fireBaseConfig";
 import { deleteDoc, doc } from "firebase/firestore";
 
-const open = ref(false);
+export default {
+  data() {
+    return {
+      open: false,
+      movies: [] as any[],
+      idToBeDeleted: "",
+    };
+  },
+  firestore: {
+    movies: moviesRef,
+  },
+  methods: {
+    openModal(id: any) {
+      this.idToBeDeleted = id;
+      this.open = true;
+    },
+    getMovieTitle(id: any) {
+      return this.movies.find((movie: any) => movie.id === id)?.title;
+    },
+    async deleteMovie(id: any) {
+      try {
+        await deleteDoc(doc(db, "movies", id));
 
-const movies = refreshMovies().sort((a: any, b: any) => {
-  return a.title.localeCompare(b.title);
-});
-
-const idToBeDeleted = ref("");
-
-const openModal = (id: any) => {
-  idToBeDeleted.value = id;
-  open.value = true;
-};
-
-const deleteMovie = async (id: any) => {
-  try {
-    await deleteDoc(doc(db, "movies", id));
-    refreshMovies();
-    open.value = false;
-  } catch (error) {
-    console.error("Error removing document: ", error);
-    open.value = false;
-  }
+        this.open = false;
+      } catch (error) {
+        console.error("Error removing document: ", error);
+        this.open = false;
+      }
+    },
+  },
 };
 </script>
 
@@ -33,7 +40,7 @@ const deleteMovie = async (id: any) => {
   <div class="container">
     <div class="d-flex justify-content-between" style="margin-top: 1rem">
       <h3>Movies</h3>
-      <RouterLink to="/add" class="btn btn-primary">
+      <RouterLink to="/add" class="btn btn-primary" style="border-radius: 20px">
         <i class="fa-solid fa-plus" style="margin-right: 0.5rem"></i>
         Add Movie
       </RouterLink>
@@ -59,25 +66,30 @@ const deleteMovie = async (id: any) => {
                   <td>{{ movie.year }}</td>
 
                   <td>
-                    <RouterLink
-                      :to="{ name: 'Show', params: { id: movie.id } }"
-                      class="btn btn-sm btn-info"
-                    >
-                      <i class="fa-solid fa-eye"></i>
-                    </RouterLink>
-                    <RouterLink
-                      :to="{ name: 'Edit', params: { id: movie.id } }"
-                      class="btn btn-sm btn-primary"
-                    >
-                      <i class="fa-solid fa-pencil"></i>
-                    </RouterLink>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-danger"
-                      @click="openModal(movie.id)"
-                    >
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <div class="btn-group" style="gap: 0.5rem">
+                      <RouterLink
+                        :to="{ name: 'Show', params: { id: movie.id } }"
+                        class="btn btn-sm btn-secondary"
+                        style="border-radius: 10px"
+                      >
+                        <i class="fa-solid fa-eye"></i>
+                      </RouterLink>
+                      <RouterLink
+                        :to="{ name: 'Edit', params: { id: movie.id } }"
+                        class="btn btn-sm btn-primary"
+                        style="border-radius: 10px"
+                      >
+                        <i class="fa-solid fa-pencil"></i>
+                      </RouterLink>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-danger"
+                        @click="openModal(movie.id)"
+                        style="border-radius: 10px"
+                      >
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -87,6 +99,7 @@ const deleteMovie = async (id: any) => {
       </div>
     </div>
   </div>
+
   <!-- Confirm Deleting Movie Modal -->
   <div v-if="open">
     <div class="modal show" style="display: block">
@@ -101,7 +114,7 @@ const deleteMovie = async (id: any) => {
             ></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to delete this movie?
+            Are you sure you want to delete {{ getMovieTitle(idToBeDeleted) }}?
           </div>
           <div class="modal-footer">
             <button

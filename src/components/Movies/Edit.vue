@@ -1,62 +1,55 @@
-<script setup lang="ts">
-import { ref } from "vue";
-import { querySnapshot } from "../../fireBaseConfig";
-import { useRoute, useRouter } from "vue-router";
+<script lang="ts">
+import { moviesRef } from "../../fireBaseConfig";
+import { useRoute } from "vue-router";
 import { updateDoc, doc } from "firebase/firestore";
-import { refreshMovies, db } from "../../fireBaseConfig";
+import router from "../../router";
+import { useDocument } from "vuefire";
 
-const route = useRoute();
-
-const router = useRouter();
-
-const id = route.params.id.toString();
-
-const movie = querySnapshot.docs
-  .map((doc) => {
+export default {
+  data() {
     return {
-      id: doc.id,
-      title: doc.data().title,
-      genre: doc.data().genre,
-      year: doc.data().year,
-      poster: doc.data().poster,
+      id: useRoute().params.id.toString(),
+      movie: useDocument(doc(moviesRef, useRoute().params.id.toString())),
     };
-  })
-  .find((movie) => movie.id === id);
+  },
 
-const formatedYear = ref(movie?.year) ?? "";
+  methods: {
+    cancel() {
+      router.push("/");
+    },
+    async updateMovie() {
+      const titleElement = document.getElementById("title") as HTMLInputElement;
+      const genreElement = document.getElementById("genre") as HTMLInputElement;
+      const yearElement = document.getElementById("year") as HTMLInputElement;
+      const posterElement = document.getElementById(
+        "poster"
+      ) as HTMLInputElement;
 
-const fomatedPoster = ref(movie?.poster) ?? "No Poster";
+      const title = titleElement?.value;
+      const genre = genreElement?.value;
+      const year = yearElement?.value ?? null;
+      const poster = posterElement?.files ? posterElement.files[0] : null;
 
-const updateMovie = () => {
-  const titleElement = document.getElementById("title") as HTMLInputElement;
-  const genreElement = document.getElementById("genre") as HTMLInputElement;
-  const yearElement = document.getElementById("year") as HTMLInputElement;
-  const posterElement = document.getElementById("poster") as HTMLInputElement;
+      const updatedMovie = {
+        title,
+        genre,
+        year,
+        poster,
+      };
 
-  const title = titleElement?.value;
-  const genre = genreElement?.value;
-  const year = yearElement?.value ?? null;
-  const poster = posterElement?.files ? posterElement.files[0] : null;
+      try {
+        await updateDoc(doc(moviesRef, this.id), updatedMovie);
+      } catch (error) {
+        console.error("Failed to update the movie:", error);
+      }
+    },
 
-  const updatedMovie = {
-    title,
-    genre,
-    year,
-    poster,
-  };
-
-  try {
-    updateDoc(doc(db, "movies", id), updatedMovie);
-    refreshMovies();
-  } catch (error) {
-    console.error("Failed to update the movie:", error);
-  }
-};
-
-const submitForm = (e: { preventDefault: () => void }) => {
-  e.preventDefault();
-  updateMovie();
-  router.push("/movies/" + id);
+    submitForm(e: { preventDefault: () => void }) {
+      e.preventDefault();
+      this.updateMovie();
+      router.push("/movies/" + this.id);
+    },
+  },
 };
 </script>
 
@@ -64,7 +57,7 @@ const submitForm = (e: { preventDefault: () => void }) => {
   <div class="container" style="margin-top: 1rem" v-if="movie">
     <h3>Edit Movie</h3>
     <form>
-      <div class="mb-3">
+      <div class="form-group mb-3">
         <label for="title" class="form-label">Title</label>
         <input
           type="text"
@@ -74,52 +67,51 @@ const submitForm = (e: { preventDefault: () => void }) => {
           required
         />
       </div>
-      <div class="mb-3">
+      <div class="form-group mb-3">
         <label for="genre" class="form-label">Genre</label>
-        <input
-          type="text"
-          class="form-control"
-          id="genre"
-          v-model="movie.genre"
-          required
-        />
+        <select class="form-select" id="genre" v-model="movie.genre" required>
+          <option value="action">Action</option>
+          <option value="comedy">Comedy</option>
+          <option value="drama">Drama</option>
+          <option value="horror">Horror</option>
+          <option value="sci-fi">Sci-Fi</option>
+        </select>
       </div>
-      <div class="mb-3">
+      <div class="form-group mb-3">
         <label for="year" class="form-label">Year</label>
         <input
           type="number"
           class="form-control"
           id="year"
-          v-model="formatedYear"
+          v-model="movie.year"
         />
       </div>
-      <div class="mb-3">
+      <div class="form-group mb-3">
         <label for="poster" class="form-label">Poster</label>
         <input
           type="text"
           class="form-control"
           id="poster"
-          v-model="fomatedPoster"
+          v-model="movie.poster"
         />
       </div>
-      <div class="mb-3" v-if="movie.poster">
+      <div class="form-group mb-3" v-if="movie.poster">
         <img :src="movie.poster" alt="poster" style="width: 100px" />
       </div>
-      <div class="mb-3" v-else>
+      <div class="form-group mb-3" v-else>
         <label for="poster" class="form-label">Upload Poster</label>
         <input type="file" class="form-control" id="poster" />
       </div>
 
-      <div class="mb-3" style="display: flex; gap: 1rem; margin-top: 1rem">
+      <div
+        class="form-group mb-3"
+        style="display: flex; gap: 1rem; margin-top: 1rem"
+      >
         <button type="submit" class="btn btn-primary" @click="submitForm">
           Update Movie
         </button>
 
-        <button
-          type="button"
-          class="btn btn-secondary"
-          @click="router.push('/')"
-        >
+        <button type="button" class="btn btn-secondary" @click="cancel">
           Cancel
         </button>
       </div>

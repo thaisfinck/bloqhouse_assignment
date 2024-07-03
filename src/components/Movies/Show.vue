@@ -1,22 +1,26 @@
-<script setup lang="ts">
+<script lang="ts">
 import { useRoute } from "vue-router";
-import { querySnapshot } from "../../fireBaseConfig";
+import { doc } from "firebase/firestore";
+import { moviesRef } from "../../fireBaseConfig";
+import { useDocument } from "vuefire";
 
-const route = useRoute();
-
-const id = route.params.id;
-
-const movie = querySnapshot.docs
-  .map((doc) => {
+export default {
+  props: {
+    id: {
+      type: String,
+    },
+  },
+  setup() {
     return {
-      id: doc.id,
-      title: doc.data().title,
-      genre: doc.data().genre,
-      year: doc.data().year,
-      poster: doc.data().poster,
+      id: useRoute().params.id,
     };
-  })
-  .find((movie) => movie.id === id);
+  },
+  data() {
+    return {
+      movie: useDocument(doc(moviesRef, this.id)),
+    };
+  },
+};
 </script>
 
 <template>
@@ -36,11 +40,7 @@ const movie = querySnapshot.docs
       </div>
 
       <div class="col-12" style="margin-top: 1rem; display: flex; gap: 1rem">
-        <RouterLink to="/" class="btn btn-secondary">
-          <i class="fa-solid fa-arrow-left"></i>
-          Back to Movies
-        </RouterLink>
-        <RouterLink :to="'/edit/' + movie.id" class="btn btn-warning">
+        <RouterLink :to="'/edit/' + movie.id" class="btn btn-primary">
           <i class="fa-solid fa-edit"></i>
           Edit
         </RouterLink>
