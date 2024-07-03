@@ -27,6 +27,10 @@ const router = createRouter({
       name: "Show",
       component: Show,
     },
+    {
+      path: "/:catchAll(.*)",
+      redirect: "/",
+    },
   ],
 });
 
