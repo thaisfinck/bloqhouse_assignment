@@ -14,7 +14,7 @@ export default {
       const genre = submitEvent.target.elements.genre.value;
       const year = submitEvent.target.elements.year.value;
       const poster = submitEvent.target.elements.poster.files[0]
-        ? submitEvent.target.elements.poster.files[0]
+        ? submitEvent.target.elements.poster.files[0].name
         : null;
 
       const newMovie = {
