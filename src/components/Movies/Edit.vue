@@ -1,9 +1,10 @@
 <script lang="ts">
-import { moviesRef } from "../../fireBaseConfig";
+import { moviesRef, storage } from "../../fireBaseConfig";
 import { useRoute } from "vue-router";
 import { updateDoc, doc } from "firebase/firestore";
 import router from "../../router";
 import { useDocument } from "vuefire";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export default {
   data() {
@@ -21,9 +22,19 @@ export default {
       const title = submitEvent.target.elements.title.value;
       const genre = submitEvent.target.elements.genre.value;
       const year = submitEvent.target.elements.year.value;
-      const poster = submitEvent.target.elements.poster.files[0]
-        ? submitEvent.target.elements.poster.files[0].name
+      const posterPath = submitEvent.target.elements.poster.files[0]
+        ? "movies/posters/" + submitEvent.target.elements.poster.files[0].name
         : null;
+
+      let poster = null;
+      if (posterPath) {
+        await uploadBytes(
+          ref(storage, posterPath),
+          submitEvent.target.elements.poster.files[0]
+        );
+
+        poster = await getDownloadURL(ref(storage, posterPath));
+      }
 
       const updatedMovie = {
         title,
@@ -89,10 +100,8 @@ export default {
           v-model="movie.year"
         />
       </div>
-      <div class="form-group mb-3" v-if="movie.poster">
-        <img :src="movie.poster" alt="poster" style="width: 100px" />
-      </div>
-      <div class="form-group mb-3" v-else>
+
+      <div class="form-group mb-3">
         <label for="poster" class="form-label">Upload Poster</label>
         <input name="poster" type="file" class="form-control" id="poster" />
       </div>

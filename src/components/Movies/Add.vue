@@ -1,7 +1,8 @@
 <script lang="ts">
 import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../fireBaseConfig";
+import { db, storage } from "../../fireBaseConfig";
 import router from "../../router";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 export default {
   methods: {
@@ -13,9 +14,20 @@ export default {
       const title = submitEvent.target.elements.title.value;
       const genre = submitEvent.target.elements.genre.value;
       const year = submitEvent.target.elements.year.value;
-      const poster = submitEvent.target.elements.poster.files[0]
-        ? submitEvent.target.elements.poster.files[0].name
+
+      const posterPath = submitEvent.target.elements.poster.files[0]
+        ? "movies/posters/" + submitEvent.target.elements.poster.files[0].name
         : null;
+
+      let poster = null;
+      if (posterPath) {
+        await uploadBytes(
+          ref(storage, posterPath),
+          submitEvent.target.elements.poster.files[0]
+        );
+
+        poster = await getDownloadURL(ref(storage, posterPath));
+      }
 
       const newMovie = {
         title,

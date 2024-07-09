@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -17,8 +18,14 @@ const firebaseApp = initializeApp(firebaseConfig);
 // Get a reference to the database service
 const db = getFirestore(firebaseApp);
 
+// Create storage
+const storage = getStorage(
+  firebaseApp,
+  "gs://bloqhouse-assignment.appspot.com"
+);
+
 const moviesRef = collection(db, "movies");
 
-export { db, moviesRef };
+export { db, moviesRef, storage };
 
 export default firebaseApp;
