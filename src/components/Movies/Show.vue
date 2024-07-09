@@ -30,7 +30,7 @@ export default {
       <img
         :src="movie.poster"
         alt="movie poster"
-        style="width: 100%; height: auto"
+        style="width: 50%; height: auto"
       />
     </div>
     <div class="col-md-8">
