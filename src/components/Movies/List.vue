@@ -27,11 +27,7 @@ export default {
   firestore: {
     movies: moviesRef,
   },
-  computed: {
-    sortedMovies() {
-      return this.movies.sort((a, b) => a.title.localeCompare(b.title));
-    },
-  },
+
   methods: {
     pagination(array: Movie[], page_size: number, page_number: number) {
       return array.slice(
@@ -96,7 +92,7 @@ export default {
               </thead>
               <tbody>
                 <tr
-                  v-for="movie in pagination(sortedMovies, 10, currentPage)"
+                  v-for="movie in pagination(movies, 10, currentPage)"
                   :key="movie.id"
                 >
                   <td>{{ movie.title }}</td>
